@@ -221,6 +221,7 @@ class Monitor:
         devType = config["DEVICE"]["devType"]
 
         self.displayCode = 0
+        self.logging = 1
 
         #self.localFile = str(int(time())) + "_log.txt"
         self.myContainer = Container(self.ser, self.logMode)
