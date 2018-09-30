@@ -221,7 +221,7 @@ class Monitor:
         devType = config["DEVICE"]["devType"]
 
 
-        self.localFile = str(int(time.time())) + "_log.txt"
+        self.localFile = str(int(time())) + "_log.txt"
         self.myContainer = Container(self.ser, self.logMode)
 
         if self.radio is "yes":
