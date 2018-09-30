@@ -84,7 +84,7 @@ class Container:
         "read temp and energy from the STM ... comes in as a json object I think"
         while True:
             if ser.is_open:
-                self.processReading(ser.read_until(), int(time()), True) # adjust character based on code
+                self.processReading(ser.read_until(), int(time())) # adjust character based on code
             else:
                 try:
                     ser.open()
@@ -123,6 +123,9 @@ class Container:
             self.awatts.append(a['awatt'])
             self.bwatts.append(a['bwatt'])
             self.cwatts.append(a['cwatt'])
+
+            if debug:
+                print("kwh: ", self.kwh, "a: ", a['awatt'], "b:", a['bwatt'], "c:", a['cwatt'])
 
 
     def resetEnergyAccumulators(self):
@@ -284,6 +287,7 @@ class Monitor:
         line = ts + ", " + awatts + ", " + bwatts + ", " + cwatts + "\n"
 
         with open(filename, 'a+') as f:
+            if debug: print("logging: ", line)
             f.write(line)
             f.close()
 
@@ -299,7 +303,7 @@ class Monitor:
             self.displayCode = 0
         self.sendDisplayCode()
 
-    def sendDispalyCode(self) :
+    def sendDisplayCode(self) :
         message = str(self.displayCode) + "?" + "1?display"
         self.myContainer.sendBytesToSTM(message.encode("utf-8"))
 
