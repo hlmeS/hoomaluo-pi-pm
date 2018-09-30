@@ -243,7 +243,7 @@ class Monitor:
         if debug: print("added jobs")
         self.energyLogger = self.scheduler.add_job(self.logEnergy,
                                 'interval',
-                                minutes=self.tempres, args["test.txt"]) # args=[str(int(time())) + "_log.txt"]) 
+                                minutes=self.tempres) # args=[str(int(time())) + "_log.txt"])
         self.simSwitchButton = self.scheduler.add_job(self.buttonSwitchPushed,
                                 'interval',
                                 minutes=1)
@@ -266,7 +266,7 @@ class Monitor:
         else:
             self.updateIntervals() #work around for now
 
-    def logEnergy(self, filename):
+    def logEnergy(self, filename="log.txt"):
 
         """ send availability to self.pubEnergy """
 
