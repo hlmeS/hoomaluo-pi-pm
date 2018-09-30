@@ -235,16 +235,19 @@ class Monitor:
 
         self.scheduler = BackgroundScheduler({'apscheduler.timezone': 'UTC',})
 
+
         if self.logging == 1:
-            self.addJobs()
+            self.addLoggerJob()
+        self.addJobs()
         self.scheduler.start()
 
-
+    def addLoggerJob(self):
+        self.energyLogger = self.scheduler.add_job(self.logEnergy,
+                            'interval',
+                            minutes=self.tempres,  args=[str(int(time())) + "_log.txt"])
     def addJobs(self):
         if debug: print("added jobs")
-        self.energyLogger = self.scheduler.add_job(self.logEnergy,
-                                'interval',
-                                minutes=self.tempres,  args=[str(int(time())) + "_log.txt"])
+
         self.simSwitchButton = self.scheduler.add_job(self.buttonSwitchPushed,
                                 'interval',
                                 minutes=1)
@@ -265,7 +268,7 @@ class Monitor:
         if self.logging is 0:
             self.energyLogger.remove()
         else:
-            self.updateIntervals() #work around for now
+            self.addLoggerJob() #wor()k around for now
 
     def logEnergy(self, filename="log.txt"):
 
