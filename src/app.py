@@ -63,7 +63,7 @@ class Container:
         self.awatts = []
         self.bwatts = []
         self.cwatts = []
-        self.kwh
+        self.kwh = 0 
 
 
 
