@@ -226,6 +226,7 @@ class Monitor:
 
         self.displayCode = 0
         self.logging = 1
+        self.logCount = 0
 
         #self.localFile = str(int(time())) + "_log.txt"
         self.myContainer = Container(self.ser, self.logMode)
@@ -267,14 +268,14 @@ class Monitor:
     def updateLoggingSchedule(self):
         if self.logging is 0:
             self.energyLogger.remove()
+            self.logCount = 0
         else:
             self.addLoggerJob() #wor()k around for now
 
     def logEnergy(self, filename="log.txt"):
 
         """ send availability to self.pubEnergy """
-        if debug:
-            print("trying to log")
+
         if len(self.myContainer.awatts) is not 0:
             awatts = sum(self.myContainer.awatts) / len(self.myContainer.awatts)
             bwatts = sum(self.myContainer.bwatts) / len(self.myContainer.bwatts)
@@ -293,6 +294,7 @@ class Monitor:
 
         with open(filename, 'a+') as f:
             if debug: print("logging: ", line)
+            self.logCount += 1
             f.write(line)
             f.close()
 
@@ -300,16 +302,17 @@ class Monitor:
         if debug: print("Up button pushed!")
         self.logging = abs(self.logging - 1)
         self.updateLoggingSchedule()
+        self.sendToSTM(str(self.loggingState) + "?record")
+
 
     def buttonSwitchPushed(self):
         if debug: print("Down button pushed!")
         self.displayCode += 1
         if self.displayCode is 4:
             self.displayCode = 0
-        self.sendDisplayCode()
+        self.sendToSTM(str(self.displayCode) + "?" + str(self.logCount) + "?display")
 
-    def sendDisplayCode(self) :
-        message = str(self.displayCode) + "?" + "1?display"
+    def sendToSTM(self, message) :
         self.myContainer.sendBytesToSTM(message.encode("utf-8"))
 
 def main():
