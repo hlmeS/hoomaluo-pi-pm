@@ -119,7 +119,7 @@ class Container:
         """
 
         if self.mode is 0:
-            self.kwh += timedelta * (a['awatt'] + a['bwatt'] + a[cwatt]) / (3600.0 * 1000)     # kwatt-hour
+            self.kwh += timedelta * (a['awatt'] + a['bwatt'] + a['cwatt']) / (3600.0 * 1000)     # kwatt-hour
             self.awatts.append(a['awatt'])
             self.bwatts.append(a['bwatt'])
             self.cwatts.append(a['cwatt'])
