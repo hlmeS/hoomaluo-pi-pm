@@ -126,7 +126,7 @@ class Container:
             self.cwatts.append(a['cwatt'])
 
             if debug:
-                print("kwh: ", self.kwh, "a: ", a['airms'], "b:", a['bwatt'], "c:", a['cwatt'])
+                print("kwh: ", self.kwh, "a: ", a['awatt'], "b:", a['bwatt'], "c:", a['cwatt'])
 
 
     def resetEnergyAccumulators(self):
@@ -225,7 +225,7 @@ class Monitor:
         devType = config["DEVICE"]["devType"]
 
         self.displayCode = 0
-        self.logging = 1
+        self.loggingState = 1
         self.logCount = 0
 
         #self.localFile = str(int(time())) + "_log.txt"
@@ -237,7 +237,7 @@ class Monitor:
         self.scheduler = BackgroundScheduler({'apscheduler.timezone': 'UTC',})
 
 
-        if self.logging == 1:
+        if self.loggingState == 1:
             self.addLoggerJob()
         self.addJobs()
         self.scheduler.start()
@@ -266,7 +266,7 @@ class Monitor:
         self.addJobs()
 
     def updateLoggingSchedule(self):
-        if self.logging is 0:
+        if self.loggingState is 0:
             self.energyLogger.remove()
             self.logCount = 0
         else:
@@ -300,7 +300,7 @@ class Monitor:
 
     def buttonStartPushed(self):
         if debug: print("Up button pushed!")
-        self.logging = abs(self.logging - 1)
+        self.loggingState = abs(self.loggingState - 1)
         self.updateLoggingSchedule()
         self.sendToSTM(str(self.loggingState) + "?record")
 
