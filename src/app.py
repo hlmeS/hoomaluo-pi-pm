@@ -220,23 +220,32 @@ class Monitor:
         self.custId = config["DEVICE"]["custId"]
         devType = config["DEVICE"]["devType"]
 
+        self.displayCode = 0
 
-        self.localFile = str(int(time())) + "_log.txt"
+        #self.localFile = str(int(time())) + "_log.txt"
         self.myContainer = Container(self.ser, self.logMode)
 
         if self.radio is "yes":
             self.myRadio = Radio(self.devId, self.custId, self)
 
         self.scheduler = BackgroundScheduler({'apscheduler.timezone': 'UTC',})
-        self.addJobs()
+
+        if self.logging == 1:
+            self.addJobs()
         self.scheduler.start()
+
 
     def addJobs(self):
         if debug: print("added jobs")
-
         self.energyLogger = self.scheduler.add_job(self.logEnergy,
                                 'interval',
-                                minutes=self.tempres)
+                                minutes=self.tempres, args=[str(int(time())) + "_log.txt"])
+        self.simSwitchButton = self.scheduler.add_job(self.buttonSwitchPushed,
+                                'interval',
+                                minutes=1)
+        self.simStartButton = self.scheduler.add_job(self.buttonStartPushed,
+                                'interval',
+                                minutes = 2)
         # add daily check for local storage
         # add 15 min update for screen?
 
@@ -247,7 +256,13 @@ class Monitor:
             job.remove()
         self.addJobs()
 
-    def logEnergy(self):
+    def updateLoggingSchedule(self):
+        if self.logging is 0:
+            self.energyLogger.remove()
+        else:
+            self.updateIntervals() #work around for now
+
+    def logEnergy(self, filename):
 
         """ send availability to self.pubEnergy """
 
@@ -259,6 +274,7 @@ class Monitor:
             awatts = bwatts = cwatts = 0
 
         ts = str(int(time()))
+
         if self.radio is "yes":
             payload = ('{"ts": '+ ts +  ', "awatts": ' + str(awatts)
                         + ', "bwatts": ' + str(bwatts) + ', "cwatts": ' + str(cwatts) +  ' }}' )
@@ -266,24 +282,25 @@ class Monitor:
 
         line = ts + ", " + awatts + ", " + bwatts + ", " + cwatts + "\n"
 
-        with open(self.localFile, 'a+') as f:
+        with open(filename, 'a+') as f:
             f.write(line)
             f.close()
 
     def buttonStartPushed(self):
         if debug: print("Up button pushed!")
-        self.logging += 1
+        self.logging = abs(self.logging - 1)
         self.updateLoggingSchedule()
 
     def buttonSwitchPushed(self):
         if debug: print("Down button pushed!")
-        self.setpoint -= 1
-        self.updateControls()
+        self.displayCode += 1
+        if self.displayCode is 4:
+            self.displayCode = 0
+        self.sendDisplayCode()
 
-    def buttonOnPushed(self):
-        if debug: print("On button pushed")
-        self.status = abs(self.status - 1)
-        self.updateControls(True)
+    def sendDispalyCode(self) :
+        message = str(self.displayCode) + "?" + "1?display"
+        self.myContainer.sendBytesToSTM(message.encode("utf-8"))
 
 def main():
     global debug
