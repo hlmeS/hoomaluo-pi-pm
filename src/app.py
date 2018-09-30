@@ -64,6 +64,7 @@ class Container:
         self.bwatts = []
         self.cwatts = []
         self.kwh = 0
+        self.ser = serialConnection
 
 
 
@@ -285,7 +286,7 @@ class Monitor:
                         + ', "bwatts": ' + str(bwatts) + ', "cwatts": ' + str(cwatts) +  ' }}' )
             self.myRadio.sendEnergy(payload)
 
-        line = ts + ", " + awatts + ", " + bwatts + ", " + cwatts + "\n"
+        line = ts + ", " + str(awatts) + ", " + str(bwatts) + ", " + str(cwatts) + "\n"
 
         with open(filename, 'a+') as f:
             if debug: print("logging: ", line)
