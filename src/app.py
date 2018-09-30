@@ -17,23 +17,21 @@ Overview:
 * Communicate with STM32 uController over RS232:
     -  send status, temp setpoint, and IR command
     -  receive power (ac and dc) and temperature as json object
-* Read GPIO buttons for temperature setpoints
-* Device modes:
-    1: send ac and dc energy
-    2: maybe something here for later
+* Read GPIO buttons for controls
+* Different modes are:
+    - 4-wye : 4-wire wye with 3 cts and 3 voltages
+    - 4-delta : 4-wire delta with 3 cts and 3 voltages
+    - 3-1ph : 3-wire 1 phase with 2 cts and 1 voltage
+    - m-1ph : multiple 1phase circuits with 1ct and voltage per circuit
 
 Packages:
 * paho-mqtt ; for mqtt communication: https://pypi.python.org/pypi/paho-mqtt/1.1
-* neo4j ; for later
 * pandas
 * numpy
 * threading
 
 
 """
-
-#import csv
-#import pandas as pd
 from time import sleep,time
 import datetime
 import paho.mqtt.client as mqtt
@@ -41,7 +39,6 @@ import json
 import threading
 import os
 import sys
-#from neo4j.v1 import GraphDatabase
 from apscheduler.schedulers.background import BackgroundScheduler
 from gpiozero import Button
 import serial
@@ -55,17 +52,18 @@ def f2c(c):
     return (5/9)*(F-32)
 
 class Container:
-    def __init__(self, serialConnection):
+    def __init__(self, serialConnection, mode):
         """ initialize variables """
 
+
         self.ts = int(time())
-        self.ace_accum = 0
-        self.dce_accum = 0
-        self.irms = []
-        self.vrms = []
-        self.watts = []
-        self.ser = serialConnection
-        self.kwh = 0
+        self.mode = mode
+        if self.mode is not 0:
+            self.payload = ""
+        self.awatts = []
+        self.bwatts = []
+        self.cwatts = []
+        self.kwh
 
 
 
@@ -108,26 +106,29 @@ class Container:
         else: a = json.loads(reading.decode("utf-8")) # turn json string into an object
         if serialDebug: print(a)
 
-
         # get time interval
         timedelta = ts - self.ts
         self.ts = ts
 
         # calculate energies
-        self.ace_accum = timedelta * (a['awatt'] + a['bwatt']) / 3600.0     # watt-hour
-        self.dce_accum = timedelta * (a['dcp']) / 3600.0                    # watt-hour
-        self.irms.append(a['airms']+a['birms'])
-        self.vrms.append(a['avrms']+a['bvrms'])
-        self.watts.append(a['awatt'] + a['bwatt'])
+        """
+            - 4-wye : 4-wire wye with 3 cts and 3 voltages
+            - 4-delta : 4-wire delta with 3 cts and 3 voltages
+            - 3-1ph : 3-wire 1 phase with 2 cts and 1 voltage
+            - m-1ph : multiple 1phase circuits with 1ct and voltage per circuit
+        """
+
+        if self.mode is 0:
+            self.kwh += timedelta * (a['awatt'] + a['bwatt'] + a[cwatt]) / (3600.0 * 1000)     # kwatt-hour
+            self.awatts.append(a['awatt'])
+            self.bwatts.append(a['bwatt'])
+            self.cwatts.append(a['cwatt'])
+
 
     def resetEnergyAccumulators(self):
-        self.kwh = self.kwh + self.e_accum
-        self.ace_accum = 0
-        self.dce_accum = 0
-        self.irms = []
-        self.vrms = []
-        self.watts = []
-
+        self.awatts = []
+        self.bwatts = []
+        self.cwatts = []
 
 
 class Radio:
@@ -188,18 +189,7 @@ class Radio:
         else:
             pass
 
-    def sendEnergy(self):
-        """ send availability to self.pubEnergy """
-        if len(self.controller.myContainer.vrms) != 0:
-            vrms = sum(self.controller.myContainer.vrms) / len(self.controller.myContainer.vrms)
-            irms = sum(self.controller.myContainer.irms) / len(self.controller.myContainer.irms)
-            watts = sum(self.controller.myContainer.watts) / len(self.controller.myContainer.watts)
-        else:
-            vrms = irms = watts = 0
-        payload = ('{"ts": '+ str(int(time())) +  ', "ace": ' + str(self.controller.myContainer.ace_accum)
-                    + ', "dce": ' + str(self.controller.myContainer.dce_accum)+
-                    ', "data": { "watt": ' + str(watts) + ', "vrms": '+ str(vrms) + ', "irms": '+ str(irms)  + ' }}' )
-
+    def sendEnergy(self, payload):
         res, self.midEnergy = self.client.publish(self.pubEnergy, payload, qos=1, retain=False)
         if debug: print("Sent: ", payload , "on", self.pubEnergy, "mid: ", self.midEnergy)
         self.controller.myContainer.resetEnergyAccumulators()
@@ -216,18 +206,26 @@ class Monitor:
     def __init__(self):
 
         config = configparser.ConfigParser()
+        config = config.read('config.ini')
 
-        #devId = os.environ["devId"]
-        self.devId = "101"  # temporary
-        self.custId = "101" # temporary
-        self.serPort = "/dev/ttyACM0" # python -m serial.tools.list_ports
-        self.localFile = "localStorage.txt"
+        # DEFAULTS
+        self.radio = config["DEFAULT"]["radio"]
+        self.tempres = int(config["DEFAULT"]["tempres"])
+        self.logMode = int(config["DEFAULT"]["logMode"])
+        self.serPort = config["DEFAULT"]["serPort"]
         self.ser = serial.Serial(self.serPort)  # open serial port
 
-        self.energy_interval = 1      # 15 min
+        # [DEVICE]
+        self.devId = config["DEVICE"]["devId"]
+        self.custId = config["DEVICE"]["custId"]
+        devType = config["DEVICE"]["devType"]
 
-        self.myContainer = Container(self.ser)
-        self.myRadio = Radio(self.devId, self.custId, self)
+
+        self.localFile = str(int(time.time())) + "_log.txt"
+        self.myContainer = Container(self.ser, self.logMode)
+
+        if self.radio is "yes":
+            self.myRadio = Radio(self.devId, self.custId, self)
 
         self.scheduler = BackgroundScheduler({'apscheduler.timezone': 'UTC',})
         self.addJobs()
@@ -235,9 +233,10 @@ class Monitor:
 
     def addJobs(self):
         if debug: print("added jobs")
-        self.energyReporter = self.scheduler.add_job(self.myRadio.sendEnergy,
+
+        self.energyLogger = self.scheduler.add_job(self.logEnergy,
                                 'interval',
-                                minutes=self.energy_interval)
+                                minutes=self.tempres)
         # add daily check for local storage
         # add 15 min update for screen?
 
@@ -248,12 +247,35 @@ class Monitor:
             job.remove()
         self.addJobs()
 
-    def buttonUpPushed(self):
-        if debug: print("Up button pushed!")
-        self.setpoint += 1
-        self.updateControls()
+    def logEnergy(self):
 
-    def buttonDownPushed(self):
+        """ send availability to self.pubEnergy """
+
+        if len(self.myContainer.awatts) is not 0:
+            awatts = sum(self.myContainer.awatts) / len(self.myContainer.awatts)
+            bwatts = sum(self.myContainer.bwatts) / len(self.myContainer.bwatts)
+            cwatts = sum(self.myContainer.awatts) / len(self.myContainer.cwatts)
+        else:
+            awatts = bwatts = cwatts = 0
+
+        ts = str(int(time()))
+        if self.radio is "yes":
+            payload = ('{"ts": '+ ts +  ', "awatts": ' + str(awatts)
+                        + ', "bwatts": ' + str(bwatts) + ', "cwatts": ' + str(cwatts) +  ' }}' )
+            self.myRadio.sendEnergy(payload)
+
+        line = ts + ", " + awatts + ", " + bwatts + ", " + cwatts + "\n"
+
+        with open(self.localFile, 'a+') as f:
+            f.write(line)
+            f.close()
+
+    def buttonStartPushed(self):
+        if debug: print("Up button pushed!")
+        self.logging += 1
+        self.updateLoggingSchedule()
+
+    def buttonSwitchPushed(self):
         if debug: print("Down button pushed!")
         self.setpoint -= 1
         self.updateControls()
@@ -266,17 +288,15 @@ class Monitor:
 def main():
     global debug
     debug = True
-    myController = Controller()
+    myMonitor = Monitor()
 
     onButton = Button(5)
-    upButton = Button(11)
-    downButton = Button(9)
-    onButton.when_pressed = myController.buttonOnPushed
-    upButton.when_pressed = myController.buttonUpPushed
-    downButton.when_pressed = myController.buttonDownPushed
+    switchButton = Button(11)
+    onButton.when_pressed = myMonitor.buttonStartPushed
+    switchButton.when_pressed = myMonitor.buttonSwitchPushed
 
     # serial read is a seperate thread
-    ser_thread = threading.Thread(target=myController.myContainer.readSTM, args = [myController.ser])
+    ser_thread = threading.Thread(target=myMonitor.myContainer.readSTM, args = [myMonitor.ser])
     print("start serial read thread")
     ser_thread.start()
 
