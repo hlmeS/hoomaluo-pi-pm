@@ -63,7 +63,7 @@ class Container:
         self.awatts = []
         self.bwatts = []
         self.cwatts = []
-        self.kwh = 0 
+        self.kwh = 0
 
 
 
@@ -84,7 +84,7 @@ class Container:
         "read temp and energy from the STM ... comes in as a json object I think"
         while True:
             if ser.is_open:
-                self.processReading(ser.read_until(), int(time())) # adjust character based on code
+                self.processReading(ser.read_until(), int(time()), True) # adjust character based on code
             else:
                 try:
                     ser.open()
@@ -307,7 +307,7 @@ def main():
 
     except (KeyboardInterrupt, SystemExit):
         # Not strictly necessary if daemonic mode is enabled but should be done if possible
-        myController.scheduler.shutdown()
+        myMonitor.scheduler.shutdown()
 
 if __name__ == "__main__":
     main()
