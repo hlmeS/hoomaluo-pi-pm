@@ -206,7 +206,7 @@ class Monitor:
     def __init__(self):
 
         config = configparser.ConfigParser()
-        config = config.read('config.ini')
+        config.read('config.ini')
 
         # DEFAULTS
         self.radio = config["DEFAULT"]["radio"]
