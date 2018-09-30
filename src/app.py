@@ -125,7 +125,7 @@ class Container:
             self.cwatts.append(a['cwatt'])
 
             if debug:
-                print("kwh: ", self.kwh, "a: ", a['irms'], "b:", a['bwatt'], "c:", a['cwatt'])
+                print("kwh: ", self.kwh, "a: ", a['airms'], "b:", a['bwatt'], "c:", a['cwatt'])
 
 
     def resetEnergyAccumulators(self):
