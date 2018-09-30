@@ -269,7 +269,8 @@ class Monitor:
     def logEnergy(self, filename="log.txt"):
 
         """ send availability to self.pubEnergy """
-
+        if debug:
+            print("trying to log")
         if len(self.myContainer.awatts) is not 0:
             awatts = sum(self.myContainer.awatts) / len(self.myContainer.awatts)
             bwatts = sum(self.myContainer.bwatts) / len(self.myContainer.bwatts)
