@@ -249,12 +249,12 @@ class Monitor:
     def addJobs(self):
         if debug: print("added jobs")
 
-        self.simSwitchButton = self.scheduler.add_job(self.buttonSwitchPushed,
-                                'interval',
-                                minutes=1)
-        self.simStartButton = self.scheduler.add_job(self.buttonStartPushed,
-                                'interval',
-                                minutes = 2)
+        #self.simSwitchButton = self.scheduler.add_job(self.buttonSwitchPushed,
+        #                        'interval',
+        #                        minutes=1)
+        #self.simStartButton = self.scheduler.add_job(self.buttonStartPushed,
+        #                        'interval',
+        #                        minutes = 2)
         # add daily check for local storage
         # add 15 min update for screen?
 
