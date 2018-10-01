@@ -239,6 +239,8 @@ class Monitor:
 
         if self.loggingState == 1:
             self.addLoggerJob()
+            self.sendToSTM(str(self.loggingState) + "?record")
+            
         self.addJobs()
         self.scheduler.start()
 
