@@ -240,7 +240,7 @@ class Monitor:
         if self.loggingState == 1:
             self.addLoggerJob()
             self.sendToSTM(str(self.loggingState) + "?record")
-            
+
         self.addJobs()
         self.scheduler.start()
 
@@ -281,7 +281,7 @@ class Monitor:
         if len(self.myContainer.awatts) is not 0:
             awatts = sum(self.myContainer.awatts) / len(self.myContainer.awatts)
             bwatts = sum(self.myContainer.bwatts) / len(self.myContainer.bwatts)
-            cwatts = sum(self.myContainer.awatts) / len(self.myContainer.cwatts)
+            cwatts = sum(self.myContainer.cwatts) / len(self.myContainer.cwatts)
         else:
             awatts = bwatts = cwatts = 0
 
