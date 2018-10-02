@@ -196,7 +196,6 @@ class Radio:
     def sendEnergy(self, payload):
         res, self.midEnergy = self.client.publish(self.pubEnergy, payload, qos=1, retain=False)
         if debug: print("Sent: ", payload , "on", self.pubEnergy, "mid: ", self.midEnergy)
-        self.controller.myContainer.resetEnergyAccumulators()
         filename = self.pubEnergy.replace("/", "-") + ".txt"
         if self.storeEnergyLocal:
             f = open(filename, 'a+')
@@ -285,6 +284,7 @@ class Monitor:
         else:
             awatts = bwatts = cwatts = 0
 
+        self.myContainer.resetEnergyAccumulators()
         ts = str(int(time()))
 
         if self.radio is "yes":
