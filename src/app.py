@@ -319,7 +319,7 @@ class Monitor:
 
 def main():
     global debug
-    debug = True
+    debug = False
     myMonitor = Monitor()
 
     onButton = Button(5)
