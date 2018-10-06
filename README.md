@@ -23,5 +23,16 @@ ls
 
 Before being able to run the `app.py` file, make sure that all the requirements are installed, if you're not sure or if they're not, install them:
 ```sh
-pip3 install requirements.txt
+sudo pip3 install -r requirements.txt
+```
+Note, you may need to `sudo pip3 install --upgrade pyserial` if you get errors such as `AttributeError: 'Serial' object has no attribute 'is_open'`.
+
+To run the python app, make sure to update the `config.ini` and then run `python3 app.py`.
+
+## Crontab
+
+To execute the python script on startup and check on it every so many minutes (e.g. 15), add these by first typing `crontab -e`. Then add these two lines to the end of the file:
+```sh
+@reboot cd ~/hoomaluo-pi-pm/src && python3 app.py > test.out &
+*/15* * * * bash ~/hoomaluo-pi-pm/src/checkpython.sh
 ```
