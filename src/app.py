@@ -44,6 +44,7 @@ from gpiozero import Button
 import serial
 import configparser
 
+global debug
 
 def c2f(c):
     return (9/5)*c+32
@@ -217,7 +218,7 @@ class Monitor:
         self.logMode = int(config["DEFAULT"]["logMode"])
         self.serPort = config["DEFAULT"]["serPort"]
         self.ser = serial.Serial(self.serPort)  # open serial port
-        self.debug = config["DEFAULT"]["debug"]
+        debug = config["DEFAULT"]["debug"]
 
         # [DEVICE]
         self.devId = config["DEVICE"]["devId"]
@@ -319,10 +320,7 @@ class Monitor:
         self.myContainer.sendBytesToSTM(message.encode("utf-8"))
 
 def main():
-    global debug
-
     myMonitor = Monitor()
-    debug = myMonitor.debug
     onButton = Button(5)
     switchButton = Button(11)
     onButton.when_pressed = myMonitor.buttonStartPushed
