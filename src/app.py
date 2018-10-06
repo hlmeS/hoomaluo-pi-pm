@@ -249,8 +249,8 @@ class Monitor:
 
     def addLoggerJob(self):
         self.energyLogger = self.scheduler.add_job(self.logEnergy,
-                            'interval',
-                            minutes=self.tempres,  args=[str(int(time())) + "_log.txt"])
+                            'cron',
+                            minute='*/'+str(self.tempres),  args=[str(int(time())) + "_log.txt"])
     def addJobs(self):
         if debug: print("added jobs")
 
