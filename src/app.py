@@ -45,7 +45,6 @@ import serial
 import configparser
 
 global debug
-debug = False
 
 def c2f(c):
     return (9/5)*c+32
