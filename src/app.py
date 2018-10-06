@@ -217,6 +217,7 @@ class Monitor:
         self.logMode = int(config["DEFAULT"]["logMode"])
         self.serPort = config["DEFAULT"]["serPort"]
         self.ser = serial.Serial(self.serPort)  # open serial port
+        self.debug = config["DEFAULT"]["debug"]
 
         # [DEVICE]
         self.devId = config["DEVICE"]["devId"]
@@ -319,9 +320,9 @@ class Monitor:
 
 def main():
     global debug
-    debug = False
-    myMonitor = Monitor()
 
+    myMonitor = Monitor()
+    debug = myMonitor.debug
     onButton = Button(5)
     switchButton = Button(11)
     onButton.when_pressed = myMonitor.buttonStartPushed
