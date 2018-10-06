@@ -44,8 +44,8 @@ from gpiozero import Button
 import serial
 import configparser
 
-global debug
-debug = True
+#global debug
+#debug = True
 
 def c2f(c):
     return (9/5)*c+32
@@ -219,7 +219,8 @@ class Monitor:
         self.logMode = int(config["DEFAULT"]["logMode"])
         self.serPort = config["DEFAULT"]["serPort"]
         self.ser = serial.Serial(self.serPort)  # open serial port
-        global debug = eval(config["DEFAULT"]["debug"])
+        global debug
+        debug = eval(config["DEFAULT"]["debug"])
         print(debug)
         # [DEVICE]
         self.devId = config["DEVICE"]["devId"]
