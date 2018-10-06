@@ -219,7 +219,7 @@ class Monitor:
         self.logMode = int(config["DEFAULT"]["logMode"])
         self.serPort = config["DEFAULT"]["serPort"]
         self.ser = serial.Serial(self.serPort)  # open serial port
-        debug = eval(config["DEFAULT"]["debug"])
+        global debug = eval(config["DEFAULT"]["debug"])
         print(debug)
         # [DEVICE]
         self.devId = config["DEVICE"]["devId"]
@@ -304,14 +304,14 @@ class Monitor:
             f.close()
 
     def buttonStartPushed(self):
-        if debug: print("Up button pushed!")
+        if debug: print("record button pushed!")
         self.loggingState = abs(self.loggingState - 1)
         self.updateLoggingSchedule()
         self.sendToSTM(str(self.loggingState) + "?record")
 
 
     def buttonSwitchPushed(self):
-        if debug: print("Down button pushed!")
+        if debug: print("switch button pushed!")
         self.displayCode += 1
         if self.displayCode is 4:
             self.displayCode = 0
@@ -322,8 +322,8 @@ class Monitor:
 
 def main():
     myMonitor = Monitor()
-    onButton = Button(5)
-    switchButton = Button(11)
+    onButton = Button(9)
+    switchButton = Button(5)
     onButton.when_pressed = myMonitor.buttonStartPushed
     switchButton.when_pressed = myMonitor.buttonSwitchPushed
 
