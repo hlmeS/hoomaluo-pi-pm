@@ -45,6 +45,7 @@ import serial
 import configparser
 
 global debug
+debug = False
 
 def c2f(c):
     return (9/5)*c+32
@@ -218,7 +219,7 @@ class Monitor:
         self.logMode = int(config["DEFAULT"]["logMode"])
         self.serPort = config["DEFAULT"]["serPort"]
         self.ser = serial.Serial(self.serPort)  # open serial port
-        debug = config["DEFAULT"]["debug"]
+        debug = eval(config["DEFAULT"]["debug"])
 
         # [DEVICE]
         self.devId = config["DEVICE"]["devId"]
@@ -226,7 +227,7 @@ class Monitor:
         devType = config["DEVICE"]["devType"]
 
         self.displayCode = 0
-        self.loggingState = 1
+        self.loggingState = 0
         self.logCount = 0
 
         #self.localFile = str(int(time())) + "_log.txt"
