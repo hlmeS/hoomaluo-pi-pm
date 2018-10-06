@@ -220,7 +220,7 @@ class Monitor:
         self.serPort = config["DEFAULT"]["serPort"]
         self.ser = serial.Serial(self.serPort)  # open serial port
         debug = eval(config["DEFAULT"]["debug"])
-
+        print(debug)
         # [DEVICE]
         self.devId = config["DEVICE"]["devId"]
         self.custId = config["DEVICE"]["custId"]
