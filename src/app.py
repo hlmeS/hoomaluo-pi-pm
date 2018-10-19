@@ -159,6 +159,8 @@ class Radio:
 
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
+        self.client.on_publish = self.on_publish
+
 
         # Need to fix this to attempt reconnect
         try:
@@ -198,13 +200,28 @@ class Radio:
     def sendEnergy(self, payload):
         res, self.midEnergy = self.client.publish(self.pubEnergy, payload, qos=1, retain=False)
         if debug: print("Sent: ", payload , "on", self.pubEnergy, "mid: ", self.midEnergy)
+
         filename = self.pubEnergy.replace("/", "-") + ".txt"
         if self.storeEnergyLocal:
-            f = open(filename, 'a+')
-            f.write(self.lastEnergyPayload+"\n")
-            f.close()
+            open(filename, 'a+').writelines(self.lastEnergyPayload+"\n")
         self.storeLocalEnergy = True
         self.lastEnergyPayload = payload
+
+    def sendLocalEnergy(self):
+        if self.connectionStatus:
+            filename = self.pubEnergy.replace("/", "-") + ".txt"
+            try:
+                lines = open(filename, 'r').readlines()
+                for i, line in enumerate(lines[:]):
+                    if '{' in line.strip("\n"):
+                        self.sendEnergy(line.strip("\n"))
+                    del lines[i]
+                    sleep(15)
+
+                open(filename, 'w+').writelines(lines)
+
+            except:
+                pass
 
 
 class Monitor:
@@ -237,11 +254,14 @@ class Monitor:
         if self.radio is "yes":
             self.myRadio = Radio(self.devId, self.custId, self)
 
-        self.scheduler = BackgroundScheduler({'apscheduler.timezone': 'UTC',})
+        self.scheduler = BackgroundScheduler({'apscheduler.timezone': 'HST',})
 
 
         if self.loggingState == 1:
             self.addLoggerJob()
+        if self.radio is "yes":
+            self.addLocalEnergyFileJob()
+
         self.sendToSTM(str(self.loggingState) + "?record")
 
         self.addJobs()
@@ -251,8 +271,15 @@ class Monitor:
         self.energyLogger = self.scheduler.add_job(self.logEnergy,
                             'cron',
                             minute='*/'+str(self.tempres),  args=[str(int(time())) + "_log.txt"])
+
+    def addLocalEnergyFileJob(self):
+        self.sendLocalEnergyFile = self.scheduler.add_job(self.myRadio.sendLocalEnergy,
+                                'cron',
+                                hour=w)
+
     def addJobs(self):
         if debug: print("added jobs")
+
 
         #self.simSwitchButton = self.scheduler.add_job(self.buttonSwitchPushed,
         #                        'interval',
@@ -298,11 +325,11 @@ class Monitor:
 
         line = ts + ", " + str(awatts) + ", " + str(bwatts) + ", " + str(cwatts) + "\n"
 
-        with open(filename, 'a+') as f:
+        try:
+            open(filename, 'a+').writelines(line)
             if debug: print("logging: ", line)
-            self.logCount += 1
-            f.write(line)
-            f.close()
+        except:
+            pass
 
     def buttonStartPushed(self):
         if debug: print("record button pushed!")
