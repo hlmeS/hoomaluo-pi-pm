@@ -54,7 +54,7 @@ def f2c(c):
     return (5/9)*(F-32)
 
 class Container:
-    def __init__(self, serialConnection, mode):
+    def __init__(self, serialConnection, mode, Controller, kwhFilename="kwh-meter.txt"):
         """ initialize variables """
 
 
@@ -66,9 +66,28 @@ class Container:
         self.bwatts = []
         self.cwatts = []
         self.kwh = 0
+        self.ace_accum = 0
+        self.dce_accum = 0
         self.ser = serialConnection
+        self.kwhFile = kwhFilename
+        self.controller = Controller
 
 
+    def read_kwhMeter(self):
+        "read and return the current kwh reading"
+        try:
+            with open(self.kwhFile, 'r') as file:
+                reading = file.readline()
+                file.close()
+                return float(reading.strip('\n'))
+        except:
+            return 0
+
+    def write_kwhMeter(self, reading):
+        "overwrite existing file with the new reading"
+        with open(self.kwhFile, 'w+') as file :
+            file.write('%.6f' % reading + "\n")
+            file.close()
 
     def sendBytesToSTM(self, byteArray):
         if self.ser.is_open:
@@ -122,10 +141,17 @@ class Container:
         """
 
         if self.mode is 0:
-            self.kwh += timedelta * (a['awatt'] + a['bwatt'] + a['cwatt']) / (3600.0 * 1000)     # kwatt-hour
+            #self.kwh += timedelta * (a['awatt'] + a['bwatt'] + a['cwatt']) / (3600.0 * 1000)     # kwatt-hour
             self.awatts.append(a['awatt'])
             self.bwatts.append(a['bwatt'])
             self.cwatts.append(a['cwatt'])
+            if a['awatt'] > 0 and b['watt'] > 0 :
+                self.ace_accum += timedelta * (a['awatt'] + a['bwatt'] + a['cwatt']) / (3600.0 * 1000)    # watt-hour
+            #self.dce_accum =                     # watt-hour
+            self.irms.append(a['airms'])
+            self.vrms.append(a['avrms'])
+            self.watts.append(a['awatt'] + a['bwatt'] + a['cwatt'])
+
 
             if debug:
                 print("kwh: ", self.kwh, "a: ", a['awatt'], "b:", a['bwatt'], "c:", a['cwatt'])
@@ -135,6 +161,15 @@ class Container:
         self.awatts = []
         self.bwatts = []
         self.cwatts = []
+        if self.ace_accum > 0:
+            self.kwh = self.read_kwhMeter() + self.ace_accum
+            self.write_kwhMeter(self.kwh)
+        self.sendStringToSTM('%.5f' % self.kwh + "?kwh")
+        self.ace_accum = 0
+        #self.dce_accum = 0             # no dc component
+        self.watts = []
+        self.irms = []
+        self.vrms = []
 
 
 class Radio:
@@ -249,16 +284,17 @@ class Monitor:
         self.logCount = 0
 
         #self.localFile = str(int(time())) + "_log.txt"
-        self.myContainer = Container(self.ser, self.logMode)
+        self.myContainer = Container(self.ser, self.logMode, self)
 
         if self.radio is "yes":
             self.myRadio = Radio(self.devId, self.custId, self)
 
-        self.scheduler = BackgroundScheduler({'apscheduler.timezone': 'HST',})
+        self.scheduler = BackgroundScheduler({'apscheduler.timezone': 'HST'})
 
 
         if self.loggingState == 1:
             self.addLoggerJob()
+
         if self.radio is "yes":
             self.addLocalEnergyFileJob()
 
@@ -319,8 +355,12 @@ class Monitor:
         ts = str(int(time()))
 
         if self.radio is "yes":
-            payload = ('{"ts": '+ ts +  ', "awatts": ' + str(awatts)
-                        + ', "bwatts": ' + str(bwatts) + ', "cwatts": ' + str(cwatts) +  ' }}' )
+            payload = ('{"ts": '+ str(int(time())) +  ', "kwh": ' +  '%.5f' % self.controller.myContainer.read_kwhMeter()
+                        + ', "ace": ' + '%.5f' % self.controller.myContainer.ace_accum
+                        + ', "dce": ' + '%.5f' % self.controller.myContainer.dce_accum
+                        + ', "data": { "watt": ' + '%.5f' % watts + ', "vrms": '+ '%.5f' % vrms
+                        + ', "irms": '+ '%.5f' % irms  + ' }}' )
+
             self.myRadio.sendEnergy(payload)
 
         line = ts + ", " + str(awatts) + ", " + str(bwatts) + ", " + str(cwatts) + "\n"

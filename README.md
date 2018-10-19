@@ -17,7 +17,7 @@ ls
 ```pseudo
 -rw-r--r-- 1 pi pi 11724 Oct  6 07:05 app.py
 -rw-r--r-- 1 pi pi   148 Oct  6 07:05 checkpython.sh
--rw-r--r-- 1 pi pi   328 Oct  6 07:05 config.ini
+-rw-r--r-- 1 pi pi   328 Oct  6 07:05 config-default.ini
 -rw-r--r-- 1 pi pi    40 Oct  6 07:05 requirements.txt
 ```
 
@@ -27,7 +27,7 @@ sudo pip3 install -r requirements.txt
 ```
 Note, you may need to `sudo pip3 install --upgrade pyserial` if you get errors such as `AttributeError: 'Serial' object has no attribute 'is_open'`.
 
-To run the python app, make sure to update the `config.ini` and then run `python3 app.py`.
+To run the python app, make sure to copy the `confit-default.ini` to `config.ini` and to update its content to match the installation and purpose of the device. To run the script and observe output in the console, set `debug` to `True` and run `python3 app.py`, otherwise set it to `False` and run `bash checkpython.sh`. To check if the script is running, run `pgrep -f app.py`.
 
 ## Crontab
 
