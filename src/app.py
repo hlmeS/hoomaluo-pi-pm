@@ -308,7 +308,7 @@ class Monitor:
         #self.localFile = str(int(time())) + "_log.txt"
         self.myContainer = Container(self.ser, self.logMode, self)
 
-        if self.radio is "yes":
+        if self.radio:
             print("starting radio")
             self.myRadio = Radio(self.devId, self.custId, self)
 
@@ -318,7 +318,7 @@ class Monitor:
         if self.loggingState == 1:
             self.addLoggerJob()
 
-        if self.radio is "yes":
+        if self.radio:
             self.addLocalEnergyFileJob()
 
         self.sendToSTM(str(self.loggingState) + "?record")
