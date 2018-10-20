@@ -70,7 +70,7 @@ class Container:
         self.dce_accum = 0
         self.irms = []
         self.vrms = []
-        self.watts = [] 
+        self.watts = []
         self.ser = serialConnection
         self.kwhFile = kwhFilename
         self.controller = Controller
@@ -261,7 +261,7 @@ class Radio:
         if debug: print("Sent: ", payload , "on", self.pubEnergy, "mid: ", self.midEnergy)
 
         filename = self.pubEnergy.replace("/", "-") + ".txt"
-        if self.storeEnergyLocal:
+        if self.storeLocalEnergy:
             open(filename, 'a+').writelines(self.lastEnergyPayload+"\n")
         self.storeLocalEnergy = True
         self.lastEnergyPayload = payload
