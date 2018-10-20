@@ -124,10 +124,26 @@ class Container:
         if serialDebug:
             print(reading)
             print(type(reading))
-        if isinstance(type(reading), str): a = json.loads(reading)
-        else: a = json.loads(reading.decode("utf-8")) # turn json string into an object
-        if serialDebug: print(a)
 
+        if isinstance(type(reading), str):
+            try:
+                a = json.loads(reading)
+                self.processJSONformat(a)
+            except:
+                if serialDebug:
+                    print("cannot")
+                    print("could not process string")
+        else:
+            try:
+                b = json.loads(reading.decode("utf-8").replace('\r', '').replace('\n', ''))
+                self.processJSONformat(ts, b)
+            except:
+                if serialDebug:
+                    print("could not process byte string")
+                    print ("no can")
+
+
+    def processJSONformat(self, ts, a):
         # get time interval
         timedelta = ts - self.ts
         self.ts = ts
@@ -140,21 +156,20 @@ class Container:
             - m-1ph : multiple 1phase circuits with 1ct and voltage per circuit
         """
 
-        if self.mode is 0:
-            #self.kwh += timedelta * (a['awatt'] + a['bwatt'] + a['cwatt']) / (3600.0 * 1000)     # kwatt-hour
-            self.awatts.append(a['awatt'])
-            self.bwatts.append(a['bwatt'])
-            self.cwatts.append(a['cwatt'])
-            if a['awatt'] > 0 and a['bwatt'] > 0 :
-                self.ace_accum += timedelta * (a['awatt'] + a['bwatt'] + a['cwatt']) / (3600.0 * 1000)    # watt-hour
-            #self.dce_accum =                     # watt-hour
-            self.irms.append(a['airms'])
-            self.vrms.append(a['avrms'])
-            self.watts.append(a['awatt'] + a['bwatt'] + a['cwatt'])
+        #self.kwh += timedelta * (a['awatt'] + a['bwatt'] + a['cwatt']) / (3600.0 * 1000)     # kwatt-hour
+        self.awatts.append(a['awatt'])
+        self.bwatts.append(a['bwatt'])
+        self.cwatts.append(a['cwatt'])
+        if a['awatt'] > 0 and a['bwatt'] > 0 :
+            self.ace_accum += timedelta * (a['awatt'] + a['bwatt'] + a['cwatt']) / (3600.0 * 1000)    # watt-hour
+        #self.dce_accum =                     # watt-hour
+        self.irms.append(a['airms'])
+        self.vrms.append(a['avrms'])
+        self.watts.append(a['awatt'] + a['bwatt'] + a['cwatt'])
 
 
-            if debug:
-                print("kwh: ", self.kwh, "a: ", a['awatt'], "b:", a['bwatt'], "c:", a['cwatt'])
+        if debug:
+            print("kwh: ", self.kwh, "a: ", a['awatt'], "b:", a['bwatt'], "c:", a['cwatt'])
 
 
     def resetEnergyAccumulators(self):
