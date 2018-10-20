@@ -321,7 +321,7 @@ class Monitor:
 
         self.sendToSTM(str(self.loggingState) + "?record")
 
-        self.addJobs()
+        #self.addJobs()
         self.scheduler.start()
 
     def addLoggerJob(self):
@@ -335,7 +335,7 @@ class Monitor:
                                 'cron',
                                 hour=w)
 
-    def addJobs(self):
+    #def addJobs(self):
 
 
 
