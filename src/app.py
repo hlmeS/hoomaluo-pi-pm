@@ -288,6 +288,7 @@ class Monitor:
 
         # DEFAULTS
         self.radio = config["DEFAULT"]["radio"]
+        print(self.radio)
         self.tempres = int(config["DEFAULT"]["tempres"])
         self.logMode = int(config["DEFAULT"]["logMode"])
         self.serPort = config["DEFAULT"]["serPort"]
@@ -308,6 +309,7 @@ class Monitor:
         self.myContainer = Container(self.ser, self.logMode, self)
 
         if self.radio is "yes":
+            print("starting radio")
             self.myRadio = Radio(self.devId, self.custId, self)
 
         self.scheduler = BackgroundScheduler({'apscheduler.timezone': 'HST'})
