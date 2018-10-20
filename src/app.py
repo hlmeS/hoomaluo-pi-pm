@@ -191,7 +191,7 @@ class Container:
 
 
 class Radio:
-    def __init__(self, devId, custId, Controller, localFilename):
+    def __init__(self, devId, custId, Controller):
 
         global debug
         self.devId = devId
@@ -288,7 +288,7 @@ class Monitor:
 
         # DEFAULTS
         self.radio = config["DEFAULT"]["radio"]
-        print(self.radio)
+        print("type of self.radio: ", type(self.radio), "value: ", self.radio)
         self.tempres = int(config["DEFAULT"]["tempres"])
         self.logMode = int(config["DEFAULT"]["logMode"])
         self.serPort = config["DEFAULT"]["serPort"]
