@@ -287,7 +287,7 @@ class Monitor:
         config.read('config.ini')
 
         # DEFAULTS
-        self.radio = config["DEFAULT"]["radio"]
+        self.radio = eval(config["DEFAULT"]["radio"])
         print("type of self.radio: ", type(self.radio), "value: ", self.radio)
         self.tempres = int(config["DEFAULT"]["tempres"])
         self.logMode = int(config["DEFAULT"]["logMode"])
@@ -335,7 +335,7 @@ class Monitor:
         if debug: print("local energy file job added")
         self.sendLocalEnergyFile = self.scheduler.add_job(self.myRadio.sendLocalEnergy,
                                 'cron',
-                                hour=w)
+                                hour=2)
 
     #def addJobs(self):
 
