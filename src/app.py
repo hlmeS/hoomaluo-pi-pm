@@ -145,7 +145,7 @@ class Container:
             self.awatts.append(a['awatt'])
             self.bwatts.append(a['bwatt'])
             self.cwatts.append(a['cwatt'])
-            if a['awatt'] > 0 and b['watt'] > 0 :
+            if a['awatt'] > 0 and a['bwatt'] > 0 :
                 self.ace_accum += timedelta * (a['awatt'] + a['bwatt'] + a['cwatt']) / (3600.0 * 1000)    # watt-hour
             #self.dce_accum =                     # watt-hour
             self.irms.append(a['airms'])
@@ -180,10 +180,10 @@ class Radio:
 
         self.controller = Controller
         # subscriptions
-        self.subSettings = "maluo_1/set/"+custId+"/"+devId+"/info"
+        self.subSettings = "maluo_1/pm/set/"+custId+"/"+devId+"/info"
 
         # publishing
-        self.pubEnergy = "maluo_1/metering/energy/"+custId+"/"+devId
+        self.pubEnergy = "maluo_1/pm/metering/energy/"+custId+"/"+devId
 
         self.storeLocalEnergy = False
         self.midEnergy = 0
