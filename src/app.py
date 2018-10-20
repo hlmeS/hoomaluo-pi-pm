@@ -193,10 +193,12 @@ class Container:
 class Radio:
     def __init__(self, devId, custId, Controller, localFilename):
 
+
         self.devId = devId
         self.custId = custId
 
         self.controller = Controller
+
         # subscriptions
         self.subSettings = "maluo_1/pm/set/"+custId+"/"+devId+"/info"
 
@@ -230,6 +232,7 @@ class Radio:
         # reconnect then subscriptions will be renewed.
         sleep(5)                # quick delay
         self.client.subscribe(self.subSettings)
+        print("connected to "+self.subSettings)
 
     def on_publish(self, client, userdata, mid):
         """ Callback function that's called on successful delivery (need qos 1 or 2 for this to make sense) """
@@ -425,6 +428,7 @@ def main():
 
     except (KeyboardInterrupt, SystemExit):
         # Not strictly necessary if daemonic mode is enabled but should be done if possible
+        myMonitor.sendToSTM(str(0) + "?record")
         myMonitor.scheduler.shutdown()
 
 if __name__ == "__main__":
