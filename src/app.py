@@ -378,7 +378,7 @@ class Monitor:
         self.myContainer.resetEnergyAccumulators()
         ts = str(int(time()))
 
-        if self.radio is "yes":
+        if self.radio:
             payload = ('{"ts": '+ str(int(time())) +  ', "kwh": ' +  '%.5f' % self.controller.myContainer.read_kwhMeter()
                         + ', "ace": ' + '%.5f' % self.controller.myContainer.ace_accum
                         + ', "dce": ' + '%.5f' % self.controller.myContainer.dce_accum
