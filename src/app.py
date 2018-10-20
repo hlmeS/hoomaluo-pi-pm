@@ -295,7 +295,7 @@ class Monitor:
         devType = config["DEVICE"]["devType"]
 
         self.displayCode = 0
-        self.loggingState = 0
+        self.loggingState = 1
         self.logCount = 0
 
         #self.localFile = str(int(time())) + "_log.txt"
