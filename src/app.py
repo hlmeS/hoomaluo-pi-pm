@@ -68,6 +68,9 @@ class Container:
         self.kwh = 0
         self.ace_accum = 0
         self.dce_accum = 0
+        self.irms = []
+        self.vrms = []
+        self.watts = [] 
         self.ser = serialConnection
         self.kwhFile = kwhFilename
         self.controller = Controller
@@ -288,14 +291,12 @@ class Monitor:
 
         # DEFAULTS
         self.radio = eval(config["DEFAULT"]["radio"])
-        print("type of self.radio: ", type(self.radio), "value: ", self.radio)
         self.tempres = int(config["DEFAULT"]["tempres"])
         self.logMode = int(config["DEFAULT"]["logMode"])
         self.serPort = config["DEFAULT"]["serPort"]
         self.ser = serial.Serial(self.serPort)  # open serial port
         global debug
         debug = eval(config["DEFAULT"]["debug"])
-        print(debug)
         # [DEVICE]
         self.devId = config["DEVICE"]["devId"]
         self.custId = config["DEVICE"]["custId"]
@@ -309,7 +310,6 @@ class Monitor:
         self.myContainer = Container(self.ser, self.logMode, self)
 
         if self.radio:
-            print("starting radio")
             self.myRadio = Radio(self.devId, self.custId, self)
 
         self.scheduler = BackgroundScheduler({'apscheduler.timezone': 'HST'})
