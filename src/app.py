@@ -65,7 +65,7 @@ class Container:
         self.awatts = []
         self.bwatts = []
         self.cwatts = []
-        self.kwh = read_kwhMeter()
+        self.kwh = self.read_kwhMeter()
         self.ace_accum = 0
         self.dce_accum = 0
         self.irms = []
