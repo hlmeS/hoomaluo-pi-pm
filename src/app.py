@@ -390,8 +390,8 @@ class Monitor:
 
             self.myRadio.sendEnergy(payload)
 
-        line = ts + ', ' +  '%.5f' % self.myContainer.read_kwhMeter()
-                    + ", " + '%.5f' % awatts + ", " + '%.5f' % bwatts + ", " + '%.5f' % cwatts + "\n"
+        line = (ts + ', ' +  '%.5f' % self.myContainer.read_kwhMeter()
+                    + ", " + '%.5f' % awatts + ", " + '%.5f' % bwatts + ", " + '%.5f' % cwatts + "\n")
 
         try:
             open(filename, 'a+').writelines(line)
