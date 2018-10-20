@@ -57,7 +57,7 @@ class Container:
     def __init__(self, serialConnection, mode, Controller, kwhFilename="kwh-meter.txt"):
         """ initialize variables """
 
-
+        global debug
         self.ts = int(time())
         self.mode = mode
         if self.mode is not 0:
@@ -193,7 +193,7 @@ class Container:
 class Radio:
     def __init__(self, devId, custId, Controller, localFilename):
 
-
+        global debug
         self.devId = devId
         self.custId = custId
 
@@ -330,12 +330,13 @@ class Monitor:
                             minute='*/'+str(self.tempres),  args=[str(int(time())) + "_log.txt"])
 
     def addLocalEnergyFileJob(self):
+        if debug: print("local energy file job added")
         self.sendLocalEnergyFile = self.scheduler.add_job(self.myRadio.sendLocalEnergy,
                                 'cron',
                                 hour=w)
 
     def addJobs(self):
-        if debug: print("added jobs")
+
 
 
         #self.simSwitchButton = self.scheduler.add_job(self.buttonSwitchPushed,
