@@ -89,6 +89,9 @@ class Container:
             file.write('%.6f' % reading + "\n")
             file.close()
 
+    def sendStringToSTM(self, message) :
+        self.sendBytesToSTM(message.encode("utf-8"))
+
     def sendBytesToSTM(self, byteArray):
         if self.ser.is_open:
             if debug: print("Serial is open. Sending: ", byteArray)
