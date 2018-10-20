@@ -372,16 +372,19 @@ class Monitor:
             awatts = sum(self.myContainer.awatts) / len(self.myContainer.awatts)
             bwatts = sum(self.myContainer.bwatts) / len(self.myContainer.bwatts)
             cwatts = sum(self.myContainer.cwatts) / len(self.myContainer.cwatts)
+            vrms = sum(self.myContainer.vrms) / len(self.myContainer.vrms)
+            irms = sum(self.myContainer.irms) / len(self.myContainer.irms)
+            watts = sum(self.myContainer.watts) / len(self.myContainer.watts)
         else:
-            awatts = bwatts = cwatts = 0
+            awatts = bwatts = cwatts = vrms = irms = watts = 0
 
         self.myContainer.resetEnergyAccumulators()
         ts = str(int(time()))
 
         if self.radio:
-            payload = ('{"ts": '+ str(int(time())) +  ', "kwh": ' +  '%.5f' % self.controller.myContainer.read_kwhMeter()
-                        + ', "ace": ' + '%.5f' % self.controller.myContainer.ace_accum
-                        + ', "dce": ' + '%.5f' % self.controller.myContainer.dce_accum
+            payload = ('{"ts": '+ str(int(time())) +  ', "kwh": ' +  '%.5f' % self.myContainer.read_kwhMeter()
+                        + ', "ace": ' + '%.5f' % self.myContainer.ace_accum
+                        + ', "dce": ' + '%.5f' % self.myContainer.dce_accum
                         + ', "data": { "watt": ' + '%.5f' % watts + ', "vrms": '+ '%.5f' % vrms
                         + ', "irms": '+ '%.5f' % irms  + ' }}' )
 
